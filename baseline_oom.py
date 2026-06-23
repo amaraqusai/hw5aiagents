@@ -12,6 +12,7 @@ if not hf_token:
     print("We need your Hugging Face token to download this massive gated model.")
     print("Paste your token here (it will be hidden as you type): ", end="")
     hf_token = getpass.getpass("")
+os.environ["HF_TOKEN"] = hf_token
 login(hf_token)
 
 # We choose a massive model, such as a 70B parameter model.
@@ -29,7 +30,7 @@ def run_baseline():
 
     try:
         print("Loading tokenizer...")
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=hf_token)
         
         print(f"Loading model ({MODEL_ID}) into memory...")
         print("WARNING: This is intentionally designed to consume massive amounts of RAM/VRAM.")
@@ -41,7 +42,8 @@ def run_baseline():
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_ID,
             torch_dtype=torch.float16,
-            low_cpu_mem_usage=False
+            low_cpu_mem_usage=False,
+            token=hf_token
         )
         
         end_load_time = time.time()

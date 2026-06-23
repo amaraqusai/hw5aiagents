@@ -12,6 +12,7 @@ if not hf_token:
     print("We need your Hugging Face token to download this massive gated model.")
     print("Paste your token here (it will be hidden as you type): ", end="")
     hf_token = getpass.getpass("")
+os.environ["HF_TOKEN"] = hf_token
 login(hf_token)
 
 # Configure basic logging to observe the process and layer-by-layer progression
