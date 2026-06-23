@@ -2,6 +2,17 @@ import torch
 import time
 import psutil
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import os
+import getpass
+from huggingface_hub import login
+
+# Explicitly log in to fix the Windows connection error bug with gated models
+hf_token = os.environ.get("HF_TOKEN")
+if not hf_token:
+    print("We need your Hugging Face token to download this massive gated model.")
+    print("Paste your token here (it will be hidden as you type): ", end="")
+    hf_token = getpass.getpass("")
+login(hf_token)
 
 # We choose a massive model, such as a 70B parameter model.
 # This will likely require ~140GB of RAM/VRAM to load in standard precision.

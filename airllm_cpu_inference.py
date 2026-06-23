@@ -2,6 +2,17 @@ import time
 import psutil
 import logging
 from airllm import AutoModel
+import os
+import getpass
+from huggingface_hub import login
+
+# Explicitly log in to fix the Windows connection error bug with gated models
+hf_token = os.environ.get("HF_TOKEN")
+if not hf_token:
+    print("We need your Hugging Face token to download this massive gated model.")
+    print("Paste your token here (it will be hidden as you type): ", end="")
+    hf_token = getpass.getpass("")
+login(hf_token)
 
 # Configure basic logging to observe the process and layer-by-layer progression
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
