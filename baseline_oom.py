@@ -3,9 +3,9 @@ import time
 import psutil
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-# We choose a massive model, such as a 70B parameter model.
+# We choose a massive model, such as a 72B parameter model.
 # This will likely require ~140GB of RAM/VRAM to load in standard precision.
-MODEL_ID = "meta-llama/Llama-2-70b-hf"
+MODEL_ID = "Qwen/Qwen1.5-72B"
 
 def get_memory_usage():
     """Returns current process memory usage in GB."""
