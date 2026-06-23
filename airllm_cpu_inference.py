@@ -7,8 +7,8 @@ from airllm import AutoModel
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Same massive 72B parameter model used in the baseline script
-MODEL_ID = "Qwen/Qwen1.5-72B"
+# Same massive 70B parameter model used in the baseline script
+MODEL_ID = "meta-llama/Llama-2-70b-hf"
 
 def get_memory_usage():
     """Returns current process memory usage in GB."""
