@@ -19,8 +19,8 @@ login(hf_token)
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
 
-# Same massive 70B parameter model used in the baseline script
-MODEL_ID = "meta-llama/Llama-2-70b-hf"
+# Same 34B parameter model used in the baseline script
+MODEL_ID = "01-ai/Yi-34B"
 
 def get_memory_usage():
     """Returns current process memory usage in GB."""

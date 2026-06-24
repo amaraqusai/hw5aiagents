@@ -15,9 +15,9 @@ if not hf_token:
 os.environ["HF_TOKEN"] = hf_token
 login(hf_token)
 
-# We choose a massive model, such as a 70B parameter model.
-# This will likely require ~140GB of RAM/VRAM to load in standard precision.
-MODEL_ID = "meta-llama/Llama-2-70b-hf"
+# We choose a medium-massive model, such as a 34B parameter model.
+# This will likely require ~68GB of RAM/VRAM to load in standard precision.
+MODEL_ID = "01-ai/Yi-34B"
 
 def get_memory_usage():
     """Returns current process memory usage in GB."""
