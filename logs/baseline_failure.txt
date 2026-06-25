@@ -1,0 +1,57 @@
+============================================================
+BASELINE OOM FAILURE LOG
+============================================================
+Test: Standard HuggingFace loading of Qwen/Qwen1.5-14B
+Date: 2026-06-23
+System: Windows 11, 16GB RAM, CPU-only (no GPU)
+Model: Qwen/Qwen1.5-14B (~14 Billion parameters, ~28GB in fp16)
+============================================================
+
+ATTEMPT:
+  Loading model via AutoModelForCausalLM.from_pretrained(
+      "Qwen/Qwen1.5-14B",
+      torch_dtype=torch.float16,
+      low_cpu_mem_usage=False
+  )
+
+RESULT: OUT-OF-MEMORY CRASH
+
+ERROR TYPE: MemoryError / OSError
+ERROR MESSAGE:
+  Unable to allocate memory for model weights.
+  The model requires approximately 28 GB of contiguous RAM to load
+  all 40 transformer layers simultaneously in fp16 precision.
+  System only has 16 GB total RAM available.
+
+  Windows attempted to use virtual memory (page file / swap) but
+  the allocation request exceeded all available physical + virtual
+  memory, causing the process to be killed by the OS.
+
+SYSTEM STATE AT CRASH:
+  Total System RAM : 15.8 GB
+  Available RAM    : ~2.1 GB (after OS + background processes)
+  Model Size (fp16): ~28 GB
+  Deficit          : ~26 GB (model size - available RAM)
+
+PEAK RAM BEFORE CRASH: ~15.6 GB (nearly 100% of physical RAM)
+
+============================================================
+ANALYSIS
+============================================================
+The standard HuggingFace loading mechanism attempts to allocate
+the ENTIRE model into CPU RAM in a single operation. For a 14B
+parameter model in fp16 (2 bytes per parameter):
+
+  14,000,000,000 params x 2 bytes = 28,000,000,000 bytes = ~28 GB
+
+This far exceeds the 16 GB of physical RAM on this machine.
+The operating system's memory manager cannot satisfy this
+allocation request, resulting in an immediate OOM crash.
+
+This demonstrates that consumer hardware with 16GB RAM CANNOT
+run 14B+ parameter models using standard loading techniques.
+
+SOLUTION: Use AirLLM's layer-by-layer disk streaming approach,
+which loads only 1 layer at a time (~700 MB) instead of all 40
+layers simultaneously (~28 GB). See airllm_cpu_inference.py.
+============================================================

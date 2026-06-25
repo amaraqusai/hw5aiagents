@@ -35,6 +35,65 @@ To fix this *without* downgrading libraries or modifying external packages, we i
 
 ---
 
+## 📁 Project Structure
+```
+hw5aiagents/
+├── README.md                          # This file
+├── requirements.txt                   # Python dependencies
+├── .gitignore                         # Git ignore rules
+├── TODO.md                            # Assignment checklist with results
+├── airllm_cpu_inference.py            # [MAIN] AirLLM CPU inference with monkeypatches
+├── baseline_oom.py                    # Baseline OOM crash demonstration
+├── ollama_inference.py                # Ollama local inference benchmark
+├── benchmark_utils.py                 # Benchmarking utility class + final results table
+├── colab_full_benchmark.py            # Consolidated script for Google Colab
+├── HW5_AI_Agents_Full_Benchmark.ipynb # Jupyter Notebook version
+└── logs/
+    └── baseline_failure.txt           # OOM crash evidence log
+```
+
+---
+
+## ⚙️ Prerequisites
+- **Python** 3.10 or 3.11 (not 3.12+)
+- **16 GB RAM** (minimum)
+- **~40 GB free disk space** (for model download + layer sharding)
+- **Ollama** installed locally (for Ollama benchmark test)
+
+## 📦 Installation
+```bash
+# 1. Clone the repository
+git clone https://github.com/amaraqusai/hw5aiagents.git
+cd hw5aiagents
+
+# 2. Create a virtual environment
+python -m venv .venv
+
+# 3. Activate the virtual environment
+# On Windows:
+.venv\Scripts\activate
+# On macOS/Linux:
+source .venv/bin/activate
+
+# 4. Install dependencies
+pip install -r requirements.txt
+```
+
+### Ollama Setup (for Test 3)
+```bash
+# 1. Download and install Ollama from https://ollama.com
+# 2. Verify installation
+ollama --version
+
+# 3. Pull the llama2 model
+ollama pull llama2
+
+# 4. Run the Ollama server (runs in background)
+ollama serve
+```
+
+---
+
 ## 🚀 How to Run
 
 ### 1. The Standard Baseline (Expected to Crash)
