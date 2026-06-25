@@ -2,22 +2,11 @@ import torch
 import time
 import psutil
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import os
-import getpass
-from huggingface_hub import login
 
-# Explicitly log in to fix the Windows connection error bug with gated models
-hf_token = os.environ.get("HF_TOKEN")
-if not hf_token:
-    print("We need your Hugging Face token to download this massive gated model.")
-    print("Paste your token here (it will be hidden as you type): ", end="")
-    hf_token = getpass.getpass("")
-os.environ["HF_TOKEN"] = hf_token
-login(hf_token)
-
-# We choose a medium-massive model, such as a 34B parameter model.
-# This will likely require ~68GB of RAM/VRAM to load in standard precision.
-MODEL_ID = "01-ai/Yi-34B"
+# Qwen1.5-14B: 14 billion parameters, ~28GB in fp16.
+# This is fully open source — no token or approval needed.
+# It will exceed 16GB RAM and trigger an Out-Of-Memory crash.
+MODEL_ID = "Qwen/Qwen1.5-14B"
 
 def get_memory_usage():
     """Returns current process memory usage in GB."""
@@ -30,7 +19,7 @@ def run_baseline():
 
     try:
         print("Loading tokenizer...")
-        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, token=hf_token)
+        tokenizer = AutoTokenizer.from_pretrained(MODEL_ID)
         
         print(f"Loading model ({MODEL_ID}) into memory...")
         print("WARNING: This is intentionally designed to consume massive amounts of RAM/VRAM.")
@@ -42,8 +31,7 @@ def run_baseline():
         model = AutoModelForCausalLM.from_pretrained(
             MODEL_ID,
             torch_dtype=torch.float16,
-            low_cpu_mem_usage=False,
-            token=hf_token
+            low_cpu_mem_usage=False
         )
         
         end_load_time = time.time()

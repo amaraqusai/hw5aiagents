@@ -45,48 +45,48 @@
 - [ ] 4.8 Confirm that the local execution through Ollama is successful.
 
 ## 5. The Baseline Test (The Failing/Slow Scenario)
-- [ ] 5.1 Write the script to load the chosen **large model** standardly (without AirLLM).
-- [ ] 5.2 Attempt to load the model onto the GPU (if available).
-- [ ] 5.3 Attempt to load the model onto the CPU RAM.
-- [ ] 5.4 Execute a prompt.
-- [ ] 5.5 Observe the system behavior.
-- [ ] 5.6 Did it crash due to Out Of Memory (OOM)? [Yes/No]
-- [ ] 5.7 Did it rely heavily on swap memory and become unplayably slow? [Yes/No]
-- [ ] 5.8 Take a screenshot or copy the error log of the failure.
-- [ ] 5.9 Save the failure evidence in a `logs/baseline_failure.txt` file.
+- [x] 5.1 Write the script to load the chosen **large model** standardly (without AirLLM).
+- [x] 5.2 Attempt to load the model onto the GPU (if available).
+- [x] 5.3 Attempt to load the model onto the CPU RAM.
+- [x] 5.4 Execute a prompt.
+- [x] 5.5 Observe the system behavior.
+- [x] 5.6 Did it crash due to Out Of Memory (OOM)? [Yes]
+- [x] 5.7 Did it rely heavily on swap memory and become unplayably slow? [Yes]
+- [x] 5.8 Take a screenshot or copy the error log of the failure.
+- [x] 5.9 Save the failure evidence in a `logs/baseline_failure.txt` file.
 
 ## 6. The AirLLM Test
-- [ ] 6.1 Modify the script to use `AirLLMLlama2` or the appropriate AirLLM class for your chosen large model.
-- [ ] 6.2 Ensure it is configured to run on the CPU.
-- [ ] 6.3 Execute the same prompt as used in the baseline test.
-- [ ] 6.4 Monitor RAM usage during execution.
-- [ ] 6.5 Observe the token generation process.
-- [ ] 6.6 Confirm that the model successfully completes the generation.
-- [ ] 6.7 Note the latency (it should be slow, but successful).
-- [ ] 6.8 Save the successful AirLLM output.
+- [x] 6.1 Modify the script to use `AirLLMLlama2` or the appropriate AirLLM class for your chosen large model.
+- [x] 6.2 Ensure it is configured to run on the CPU.
+- [x] 6.3 Execute the same prompt as used in the baseline test.
+- [x] 6.4 Monitor RAM usage during execution.
+- [x] 6.5 Observe the token generation process.
+- [x] 6.6 Confirm that the model successfully completes the generation.
+- [x] 6.7 Note the latency (it should be slow, but successful).
+- [x] 6.8 Save the successful AirLLM output.
 
 ## 7. Metrics and Measurement
-- [ ] 7.1 Set up a `time` measuring mechanism around the model generation call.
-- [ ] 7.2 Set up memory profiling (e.g., using `psutil` or `memory_profiler`).
-- [ ] 7.3 **Measure CPU only (Standard)**
-    - [ ] Run time: ___________
-    - [ ] Memory consumed: ___________
-    - [ ] Response time (time to first token): ___________
-- [ ] 7.4 **Measure GPU only (Standard)**
-    - [ ] Run time: ___________
-    - [ ] Memory consumed: ___________
-    - [ ] Response time (time to first token): ___________
-- [ ] 7.5 **Measure AirLLM (CPU)**
-    - [ ] Run time: ___________
-    - [ ] Memory consumed: ___________
-    - [ ] Response time (time to first token): ___________
+- [x] 7.1 Set up a `time` measuring mechanism around the model generation call.
+- [x] 7.2 Set up memory profiling (e.g., using `psutil` or `memory_profiler`).
+- [x] 7.3 **Measure CPU only (Standard)**
+    - [x] Run time: CRASHED
+    - [x] Memory consumed: 28+ GB (OOM)
+    - [x] Response time (time to first token): CRASHED
+- [x] 7.4 **Measure GPU only (Standard)**
+    - [x] Run time: N/A
+    - [x] Memory consumed: N/A
+    - [x] Response time (time to first token): N/A
+- [x] 7.5 **Measure AirLLM (CPU)**
+    - [x] Run time: 1015.97s
+    - [x] Memory consumed: 2.03 GB
+    - [x] Response time (time to first token): 1014.75s
 
 ## 8. Comparison and Analysis
-- [ ] 8.1 Create a table comparing the metrics collected above.
-- [ ] 8.2 Write a brief analysis on why the baseline failed.
-- [ ] 8.3 Write a brief analysis on how AirLLM mitigated the memory issue.
-- [ ] 8.4 Discuss the tradeoff between memory constraints and latency.
-- [ ] 8.5 Conclude whether AirLLM successfully proved its usefulness for this specific case.
+- [x] 8.1 Create a table comparing the metrics collected above.
+- [x] 8.2 Write a brief analysis on why the baseline failed.
+- [x] 8.3 Write a brief analysis on how AirLLM mitigated the memory issue.
+- [x] 8.4 Discuss the tradeoff between memory constraints and latency.
+- [x] 8.5 Conclude whether AirLLM successfully proved its usefulness for this specific case.
 
 ## 9. Finalizing the Assignment
 - [ ] 9.1 Review all code for cleanliness and comments.
