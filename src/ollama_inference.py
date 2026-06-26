@@ -32,6 +32,7 @@ def run_ollama():
         response.raise_for_status()
         
         output_text = ""
+        token_count = 0
         print("\nStreaming Output: ", end="")
         
         for line in response.iter_lines():
@@ -43,6 +44,9 @@ def run_ollama():
                 word = chunk.get("response", "")
                 output_text += word
                 
+                # A naive approximation of token count since Ollama's stream doesn't always provide it
+                token_count += 1
+                
                 # Print the word seamlessly to the console as it generates
                 print(word, end="", flush=True)
                 
@@ -50,6 +54,7 @@ def run_ollama():
                     break
                     
         # Stop benchmarking once generation is fully complete
+        bench.total_tokens = token_count
         bench.stop()
         
         print("\n\n" + "="*50)

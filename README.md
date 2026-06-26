@@ -42,6 +42,25 @@ To fix this *without* downgrading libraries or modifying external packages, we i
 
 ---
 
+## Concept Analysis (Theory vs Practice)
+
+To truly understand why the baseline failed and how AirLLM succeeded, we must analyze the inference pipeline using core architectural concepts:
+
+- **Compute-Bound vs. Memory-Bound:** The baseline crash wasn't because the CPU lacked the math capability to compute the weights (Compute-Bound), but because the system couldn't hold the 28+ GB of weights in RAM simultaneously (Memory-Bound). AirLLM shifts this bottleneck. By loading layers dynamically, it stays within the memory bounds but becomes heavily I/O-Bound (constrained by the disk read speed).
+- **TTFT vs TPOT (Prefill vs Decode):** LLM generation has two phases. **Prefill** processes the entire input prompt at once to build the KV Cache. This phase is represented by **Time To First Token (TTFT)**. **Decode** generates tokens one-by-one auto-regressively. This sequential phase is represented by **Time Per Output Token (TPOT)**. AirLLM's disk-streaming creates massive latency during both, as every single token generated requires swapping all 40 layers from disk.
+- **Paging and Virtual Memory:** The standard HuggingFace approach fails because it relies on the OS's native Paging mechanism (Virtual Memory / Swap). The OS blindly pages out chunks of RAM to disk when it gets full, causing thrashing and an OOM crash. AirLLM implements a smart, deterministic, layer-by-layer "paging" system tailored specifically for Transformer architectures, effectively using the SSD as an extension of RAM without OS thrashing.
+
+---
+
+## Original Extension: Quantization vs. Disk Streaming
+As an original extension to the core requirement, I implemented a comparative benchmark using **Ollama** running a heavily quantized model (`llama2-7B` at 4-bit precision). 
+
+This allows us to analyze the impact of **Quantization** (Ollama) versus **Disk Streaming** (AirLLM):
+- **Memory & Speed:** Quantization fundamentally compresses the model weights, allowing the entire model to fit into just 0.25 GB of RAM. Because it resides entirely in RAM, generation is fast (TPOT of 3.28s on CPU).
+- **The "Red Line" of Output Quality:** While AirLLM runs the uncompressed `fp16` weights retaining 100% of the model's original reasoning capabilities, quantization actively destroys information. Pushing quantization too far (e.g., below 4-bit down to 2-bit) crosses a "red line" where the model's output quality rapidly degrades into gibberish. AirLLM pays a massive latency tax, but protects the model's intelligence.
+
+---
+
 ## Project Structure
 
 ```
@@ -148,11 +167,13 @@ python src/benchmark_utils.py
 
 All tests were executed on a local Windows 11 machine (16GB RAM, CPU-only).
 
-| Framework | Model | TTFT (s) | Total Runtime (s) | Peak RAM (GB) | Status |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **HuggingFace (Standard)** | Qwen1.5-14B | CRASHED | CRASHED | 28+ (OOM) | OOM CRASH |
-| **Ollama (Local)** | llama2-7B (Q4) | 18.23 | 136.3 | 0.25 | SUCCESS |
-| **AirLLM (CPU Streaming)** | Qwen1.5-14B | 1014.75 | 1015.97 | 2.03 | SUCCESS |
+![LLM Inference Benchmark](file:///c:/Users/USER/OneDrive/Desktop/hw5AIAGENTS/hw5aiagents/figures/benchmarks.png)
+
+| Framework | Model | TTFT (s) | TPOT (s) | Throughput (tok/s) | Total Runtime (s) | Peak RAM (GB) | Status |
+| :--- | :--- | :--- | :--- | :--- | :--- | :--- | :--- |
+| **HuggingFace (Standard)** | Qwen1.5-14B | CRASHED | CRASHED | CRASHED | CRASHED | 28+ (OOM) | OOM CRASH |
+| **Ollama (Local)** | llama2-7B (Q4) | 18.23 | 3.28 | 0.27 | 136.3 | 0.25 | SUCCESS |
+| **AirLLM (CPU Streaming)** | Qwen1.5-14B | 1014.75 | 0.06 | 0.02 | 1015.97 | 2.03 | SUCCESS |
 
 ### AirLLM Generated Output
 > *"The theory of relativity is a scientific theory proposed by Albert Einstein in 1905."*
@@ -161,6 +182,28 @@ All tests were executed on a local Windows 11 machine (16GB RAM, CPU-only).
 The identical `Qwen1.5-14B` model that caused an OOM crash via standard loading ran successfully with AirLLM using only **2.03 GB of RAM -- a 93% reduction in memory usage!**
 
 The tradeoff is latency: ~17 minutes of inference time (streaming 40 layers from disk) vs. an instant crash. This proves that **massive Large Language Models CAN run on consumer hardware** by trading generation speed for extreme memory efficiency.
+
+---
+
+## Economic Viability Analysis (On-Premises vs API)
+
+When deciding whether to run models locally (On-Premises) or via a third-party API, we must analyze the economic break-even point.
+
+### The Cost Breakdown:
+1. **API Cost (Cloud):** Usage-based. Assuming a cost of ~$0.50 per 1 Million tokens (blended input/output) for a 14B class model.
+2. **On-Premises Cost (Local):** Fixed costs.
+   - **CAPEX (Capital Expenditure):** A $2000 machine amortized over 36 months = ~$55/month.
+   - **OPEX (Operational Expenditure):** Electricity and maintenance = ~$15/month.
+   - **Total Fixed Cost:** ~$70/month.
+
+![Economic Break-Even Point](file:///c:/Users/USER/OneDrive/Desktop/hw5AIAGENTS/hw5aiagents/figures/break_even.png)
+
+**Conclusion:** 
+The break-even point occurs at **140 Million tokens per month**. 
+- If you process **fewer** than 140M tokens/month, using an **API is cheaper**.
+- If you process **more** than 140M tokens/month, running the model **On-Premises is cheaper**.
+
+*Note: Features like Prompt/Context Caching offered by API providers can significantly lower the variable cost per token, which would shift this break-even point further to the right, making APIs competitive even at higher volumes.*
 
 ---
 

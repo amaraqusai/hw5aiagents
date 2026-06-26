@@ -18,6 +18,7 @@ class LLMBenchmarker:
         self.total_runtime = 0.0
         self.peak_ram = 0.0
         self.peak_vram = 0.0
+        self.total_tokens = 0
         
         # Internal state
         self._start_time = 0.0
@@ -85,10 +86,21 @@ class LLMBenchmarker:
             
     def get_results(self):
         """Returns a formatted dictionary of the collected metrics."""
+        tpot = "N/A"
+        throughput = "N/A"
+        
+        if self._first_token_recorded and self.total_tokens > 1:
+            tpot = round((self.total_runtime - self.ttft) / (self.total_tokens - 1), 4)
+            
+        if self.total_runtime > 0 and self.total_tokens > 0:
+            throughput = round(self.total_tokens / self.total_runtime, 2)
+            
         return {
             "Framework": self.framework_name,
             "Model": self.model_name,
             "TTFT (s)": round(self.ttft, 2) if self._first_token_recorded else "N/A",
+            "TPOT (s)": tpot,
+            "Throughput (tok/s)": throughput,
             "Total Runtime (s)": round(self.total_runtime, 2),
             "Peak RAM (GB)": round(self.peak_ram, 2),
             "Peak VRAM (GB)": round(self.peak_vram, 2) if torch.cuda.is_available() else "N/A"
@@ -117,6 +129,8 @@ if __name__ == "__main__":
         "Framework": "HuggingFace (Standard)",
         "Model": "Qwen1.5-14B",
         "TTFT (s)": "CRASHED",
+        "TPOT (s)": "CRASHED",
+        "Throughput (tok/s)": "CRASHED",
         "Total Runtime (s)": "CRASHED",
         "Peak RAM (GB)": "28+ (OOM)",
         "Peak VRAM (GB)": "N/A",
@@ -129,6 +143,8 @@ if __name__ == "__main__":
         "Framework": "Ollama (Local)",
         "Model": "llama2-7B (Q4)",
         "TTFT (s)": 18.23,
+        "TPOT (s)": 3.279,
+        "Throughput (tok/s)": 0.27,
         "Total Runtime (s)": 136.3,
         "Peak RAM (GB)": 0.25,
         "Peak VRAM (GB)": "N/A",
@@ -141,6 +157,8 @@ if __name__ == "__main__":
         "Framework": "AirLLM (CPU Streaming)",
         "Model": "Qwen1.5-14B",
         "TTFT (s)": 1014.75,
+        "TPOT (s)": 0.064,
+        "Throughput (tok/s)": 0.02,
         "Total Runtime (s)": 1015.97,
         "Peak RAM (GB)": 2.03,
         "Peak VRAM (GB)": "N/A",
